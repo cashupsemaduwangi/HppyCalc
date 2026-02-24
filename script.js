@@ -432,9 +432,6 @@ function tampilkanRiwayat() {
                     <p class="text-[10px] text-slate-400 uppercase font-black tracking-wider">HPP / Unit</p>
                     <p class="text-xl font-black text-blue-600">${item.hpp}</p>
                 </div>
-                <button onclick="hapusRiwayatSatu(${index})" class="p-2 text-slate-300 hover:text-red-500 transition">
-                    <i class="ph ph-trash text-xl"></i>
-                </button>
             </div>
         </div>
     `,
@@ -642,3 +639,4 @@ function lihatDetail(index) {
     showCloseButton: true,
   });
 }
+
