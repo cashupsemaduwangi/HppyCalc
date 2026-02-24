@@ -154,7 +154,7 @@ function addItemRow(containerId, prefix) {
   div.innerHTML = `
         <input type="text" placeholder="Nama item" class="flex-[2] min-w-0 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-name">
         
-        <input type="text" placeholder="Rp" class="flex-1 min-w-0 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-cost-formatted">
+        <input type="number" placeholder="Rp" class="flex-1 min-w-0 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-cost-formatted">
         
         <button type="button" onclick="this.parentElement.remove(); kalkulasiUlangOtomatis()" class="flex-none text-red-400 hover:text-red-600 p-2">
             <i class="ph ph-trash"></i>
@@ -639,4 +639,5 @@ function lihatDetail(index) {
     showCloseButton: true,
   });
 }
+
 
