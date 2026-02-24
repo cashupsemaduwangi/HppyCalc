@@ -105,7 +105,6 @@ function resetForm() {
 }
 
 function simpanKeRiwayat(data) {
-  // Validasi jika user klik simpan tapi belum hitung HPP
   if (!data) {
     Swal.fire({
       icon: "warning",
@@ -117,18 +116,20 @@ function simpanKeRiwayat(data) {
 
   let riwayat = JSON.parse(localStorage.getItem("hpp_history") || "[]");
 
-  // Tambah ke awal array
+  // Perbaikan: Masukkan semua detail biaya ke dalam objek riwayat
   riwayat.unshift({
     nama: data.nama,
     hpp: formatRupiah(data.hppPerUnit),
     tanggal: data.tanggal,
+    // Tambahkan baris di bawah ini:
+    totalBahan: data.totalBahan,
+    totalTenaga: data.totalTenaga,
+    totalOverhead: data.totalOverhead,
   });
 
-  // Batasi 10 riwayat saja
   riwayat = riwayat.slice(0, 10);
   localStorage.setItem("hpp_history", JSON.stringify(riwayat));
 
-  // Tampilkan notifikasi sukses
   Swal.fire({
     icon: "success",
     title: "Tersimpan!",
@@ -146,13 +147,16 @@ function simpanKeRiwayat(data) {
 function addItemRow(containerId, prefix) {
   const container = document.getElementById(containerId + "Container");
   const div = document.createElement("div");
+  // Perubahan: Menambahkan 'w-full' dan memastikan flex container tidak kaku
   div.className =
-    "flex items-center gap-2 mb-2 animate-in slide-in-from-left-2 duration-300";
+    "flex items-center gap-2 mb-2 animate-in slide-in-from-left-2 duration-300 w-full";
 
   div.innerHTML = `
-        <input type="text" placeholder="Nama item" class="flex-1 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-name">
-        <input type="text" placeholder="Rp" class="w-32 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-cost-formatted">
-        <button type="button" onclick="this.parentElement.remove(); kalkulasiUlangOtomatis()" class="text-red-400 hover:text-red-600 p-2">
+        <input type="text" placeholder="Nama item" class="flex-[2] min-w-0 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-name">
+        
+        <input type="text" placeholder="Rp" class="flex-1 min-w-0 px-3 py-2 bg-slate-50 rounded-lg text-sm outline-none border focus:border-blue-400 input-cost-formatted">
+        
+        <button type="button" onclick="this.parentElement.remove(); kalkulasiUlangOtomatis()" class="flex-none text-red-400 hover:text-red-600 p-2">
             <i class="ph ph-trash"></i>
         </button>
     `;
@@ -470,15 +474,21 @@ function tampilkanRiwayat() {
 
   container.innerHTML = riwayat
     .map(
-      (item) => `
-        <div class="glass-card p-4 flex justify-between items-center bg-white">
+      (item, index) => `
+        <div class="glass-card p-4 flex justify-between items-center bg-white cursor-pointer hover:bg-blue-50 transition-colors" 
+             onclick="lihatDetail(${index})">
             <div>
                 <h4 class="font-bold text-slate-800">${item.nama}</h4>
                 <p class="text-[10px] text-slate-400">${item.tanggal}</p>
             </div>
-            <div class="text-right">
-                <p class="text-blue-600 font-bold">${item.hpp}</p>
-                <p class="text-[10px] text-slate-400 uppercase font-bold">HPP/Unit</p>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-blue-600 font-bold">${item.hpp}</p>
+                    <p class="text-[10px] text-slate-400 uppercase font-bold">HPP/Unit</p>
+                </div>
+                <button onclick="event.stopPropagation(); hapusRiwayatSatu(${index})" class="p-2 text-red-400">
+                    <i class="ph ph-trash"></i>
+                </button>
             </div>
         </div>
     `,
@@ -585,4 +595,50 @@ function exportToWord() {
   link.href = URL.createObjectURL(converted);
   link.download = `Laporan_Lengkap_${dataHasil.nama}.docx`;
   link.click();
+}
+
+function lihatDetail(index) {
+  const riwayat = JSON.parse(localStorage.getItem("hpp_history") || "[]");
+  const data = riwayat[index];
+
+  if (!data) return;
+
+  // Membuat konten ringkasan yang rapi
+  let htmlContent = `
+        <div class="text-left text-sm space-y-3">
+            <div class="p-3 bg-blue-50 rounded-lg">
+                <p class="text-blue-600 font-bold uppercase text-[10px]">Ringkasan Produksi</p>
+                <p class="text-slate-700">Produk: <b>${data.nama}</b></p>
+                <p class="text-slate-700">Tanggal: ${data.tanggal}</p>
+            </div>
+            
+            <div class="space-y-1">
+                <div class="flex justify-between border-b pb-1">
+                    <span>Bahan Baku</span>
+                    <span class="font-medium">${data.totalBahan ? formatRupiah(data.totalBahan) : "-"}</span>
+                </div>
+                <div class="flex justify-between border-b pb-1">
+                    <span>Tenaga Kerja</span>
+                    <span class="font-medium">${data.totalTenaga ? formatRupiah(data.totalTenaga) : "-"}</span>
+                </div>
+                <div class="flex justify-between border-b pb-1">
+                    <span>Overhead</span>
+                    <span class="font-medium">${data.totalOverhead ? formatRupiah(data.totalOverhead) : "-"}</span>
+                </div>
+            </div>
+
+            <div class="p-3 bg-slate-900 text-white rounded-lg flex justify-between items-center">
+                <span class="text-[10px] uppercase font-bold">HPP per Unit</span>
+                <span class="text-lg font-bold">${data.hpp}</span>
+            </div>
+        </div>
+    `;
+
+  Swal.fire({
+    title: "Detail Perhitungan",
+    html: htmlContent,
+    confirmButtonText: "Tutup",
+    confirmButtonColor: "#3b82f6",
+    showCloseButton: true,
+  });
 }
