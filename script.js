@@ -7,7 +7,7 @@ let lineChartInstance = null;
 let dataHasil = null; // TAMBAHKAN INI agar bisa diakses exportToPDF
 
 // API Key aman dalam Base64
-const BaseCode = "QUl6YVN5QXlobkVHd0JuVTBYcGVrb1JickVZMVJ1eEJ1ZUV6dk9R";
+const BaseCode = "QUl6YVN5RG1WZS15NzhXbTMxNXhzVGM4cUM2V0lwSjY0Qy1EbHFR";
 const GEMINI_API_KEY = atob(BaseCode);
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -639,5 +639,6 @@ function lihatDetail(index) {
     showCloseButton: true,
   });
 }
+
 
 
